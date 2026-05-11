@@ -1,0 +1,161 @@
+tensor_model_parallel_size: 1
+pipeline_model_parallel_size: 1
+resume: false
+resume_from_config: false
+seed: 0
+cuda: 0
+world_size: 1
+per_cpus: 1
+init_method: tcp://127.0.0.1:23456
+outdir: ./checkpoints\fengwu_local_8gb
+cfg: config/fengwu_local_8gb.yaml
+desc: fengwu_20years_batch4
+rank: 0
+distributed: false
+local_rank: 0
+relative_checkpoint_dir: fengwu_local_8gb\world_size1-fengwu_20years_batch4
+era5:
+  type: era5_npy_f32
+  data_dir: C:/Users/user/Desktop/Graphcast_Project/ERA5_np_float32_2006_2026
+  input_steps: 2
+  target_steps: 4
+  sample_stride: 3
+model:
+  type: mts2d_model
+  params:
+    train_steps: 1000
+    sub_model:
+      lgunet_all:
+        img_size:
+        - 64
+        - 64
+        patch_size:
+        - 2
+        - 2
+        stride:
+        - 2
+        - 2
+        inchans_list:
+        - 4
+        - 37
+        - 37
+        - 37
+        - 37
+        - 37
+        - 4
+        - 37
+        - 37
+        - 37
+        - 37
+        - 37
+        outchans_list:
+        - 8
+        - 74
+        - 74
+        - 74
+        - 74
+        - 74
+        in_chans: 378
+        out_chans: 378
+        enc_dim: 32
+        embed_dim: 256
+        window_size:
+        - 4
+        - 8
+        enc_depths:
+        - 1
+        - 1
+        - 1
+        enc_heads:
+        - 2
+        - 4
+        - 4
+        lg_depths:
+        - 1
+        - 1
+        lg_heads:
+        - 4
+        - 4
+        Weather_T: 1
+        drop_path: 0.0
+        use_checkpoint: true
+        inp_length: 2
+        use_mlp: false
+    save_best: Possloss
+    optimizer:
+      lgunet_all:
+        type: AdamW
+        params:
+          lr: 0.0001
+          betas:
+          - 0.9
+          - 0.999
+          weight_decay: 0.01
+    lr_scheduler:
+      lgunet_all:
+        by_step: true
+        sched: cosine
+        epochs: 2
+        min_lr: 1.0e-06
+        warmup_lr: 1.0e-08
+        warmup_epochs: 1
+    extra_params:
+      enabled_amp: true
+      loss_type: Possloss
+      use_noise: false
+      checkpoint_dir: ./checkpoints/fengwu_lite_64_37levels
+      replay_buff:
+        max_size: 500
+        weighted: false
+    constants_len: 0
+dataset:
+  train:
+    type: era5_npy_f32
+    data_dir: C:/Users/user/Desktop/Graphcast_Project/ERA5_np_float32_2006_2026
+    input_steps: 2
+    target_steps: 4
+    sample_stride: 3
+    years:
+    - 2006
+    - 2007
+    - 2008
+    - 2009
+    - 2010
+    - 2011
+    - 2012
+    - 2013
+    - 2014
+    - 2015
+    - 2016
+    - 2017
+    - 2018
+    - 2019
+    - 2020
+  val:
+    type: era5_npy_f32
+    data_dir: C:/Users/user/Desktop/Graphcast_Project/ERA5_np_float32_2006_2026
+    input_steps: 2
+    target_steps: 4
+    sample_stride: 3
+    years:
+    - 2021
+    - 2022
+    - 2023
+  test:
+    type: era5_npy_f32
+    data_dir: C:/Users/user/Desktop/Graphcast_Project/ERA5_np_float32_2006_2026
+    input_steps: 2
+    target_steps: 4
+    sample_stride: 3
+    years:
+    - 2024
+    - 2025
+    - 2026
+dataloader:
+  num_workers: 2
+  pin_memory: true
+trainer:
+  batch_size: 4
+  test_batch_size: 4
+  max_epoch: 20
+  patience: 5

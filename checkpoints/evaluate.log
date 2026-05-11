@@ -1,0 +1,2 @@
+2026-05-05 00:03:35,650 evaluate INFO: finetune checkpoint path not exist
+2026-05-05 00:03:35,854 evaluate INFO: last epoch:2, metric best:-0.739233955052186

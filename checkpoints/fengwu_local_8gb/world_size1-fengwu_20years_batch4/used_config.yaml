@@ -1,0 +1,96 @@
+era5: &era5
+  type: "era5_npy_f32"
+  data_dir: "C:/Users/user/Desktop/Graphcast_Project/ERA5_np_float32_2006_2026"
+
+  input_steps: 2
+  target_steps: 4
+  sample_stride: 3
+
+
+model:
+  type: "mts2d_model"
+  params:
+    train_steps: 1000
+
+    sub_model:
+      lgunet_all:
+        img_size: [64, 64]
+        patch_size: [2, 2]
+        stride: [2, 2]
+
+        inchans_list: [4,37,37,37,37,37,4,37,37,37,37,37]
+        outchans_list: [8,74,74,74,74,74]
+
+        in_chans: 378
+        out_chans: 378
+
+        enc_dim: 32
+        embed_dim: 256
+
+        window_size: [4, 8]
+
+        enc_depths: [1, 1, 1]
+        enc_heads: [2, 4, 4]
+
+        lg_depths: [1, 1]
+        lg_heads: [4, 4]
+
+        Weather_T: 1
+        drop_path: 0.0
+        use_checkpoint: true
+        inp_length: 2
+        use_mlp: False
+
+    save_best: "Possloss"
+
+    optimizer:
+      lgunet_all:
+        type: "AdamW"
+        params:
+          lr: 0.0001
+          betas: [0.9, 0.999]
+          weight_decay: 0.01
+
+    lr_scheduler:
+      lgunet_all:
+        by_step: True
+        sched: cosine
+        epochs: 2
+        min_lr: 0.000001
+        warmup_lr: 0.00000001
+        warmup_epochs: 1
+
+    extra_params:
+      enabled_amp: True
+      loss_type: "Possloss"
+      use_noise: False
+      checkpoint_dir: "./checkpoints/fengwu_lite_64_37levels"
+      replay_buff:
+        max_size: 500
+        weighted: False
+
+
+dataset:
+  train:
+    <<: *era5
+    years: [2006, 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020]
+
+  val:
+    <<: *era5
+    years: [2021, 2022, 2023]
+
+  test:
+    <<: *era5
+    years: [2024, 2025, 2026]
+
+
+dataloader:
+  num_workers: 2
+  pin_memory: True
+
+
+trainer:
+  batch_size: 4
+  test_batch_size: 4
+  max_epoch: 20
+  patience: 5

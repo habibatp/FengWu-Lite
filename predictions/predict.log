@@ -1,0 +1,2 @@
+2026-05-10 16:34:34,462 predict INFO: finetune checkpoint path not exist
+2026-05-10 16:34:34,863 predict INFO: last epoch:19, metric best:0.4112800925895831
